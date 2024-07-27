@@ -44,4 +44,8 @@ urlpatterns = [
     path('subscribe/<int:service_id>/', views.subscribe_service, name='subscribe-service'),
     path('razorpay/callback/', views.razorpay_callback, name='razorpay_callback'),
     path('payment-success/', views.subscription_success, name='payment-success'),
+    path('subscription/<int:pk>/', SubscribeView.as_view(), name='subscription_page'),
+#Email
+    path('register/', UserRegistrationView.as_view(), name='user-register'),
+    path('otp-confirmation/', OTPConfirmationView.as_view(), name='otp-confirmation'),
 ]

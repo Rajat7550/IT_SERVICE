@@ -55,7 +55,16 @@ class Subscription(models.Model):
     razorpay_order_id = models.CharField(max_length=100, null=True, blank=True)
     razorpay_payment_id = models.CharField(max_length=100, null=True, blank=True)
     razorpay_signature = models.CharField(max_length=100, null=True, blank=True)
-    user_address = models.TextField(max_length=50)
+    address = models.TextField(max_length=50)
+
 
     def _str_(self):
         return f"Subscription by {self.user} for{self.service}"
+
+
+
+# Email
+
+class UserOTP(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)

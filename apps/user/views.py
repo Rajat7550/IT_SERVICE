@@ -1,5 +1,5 @@
 import datetime
-from random import randint
+from random import randint, random
 import pandas as pd
 import razorpay
 from django.conf import settings
@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model, authenticate, login, logout, upd
 from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -16,11 +17,11 @@ from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import never_cache
-from django.views.generic import CreateView, DeleteView, UpdateView, TemplateView, DetailView
+from django.views.generic import CreateView, DeleteView, UpdateView, TemplateView, DetailView, FormView
 from application.custom_classes import AjayDatatableView, AdminRequiredMixin, UserRequiredMixin
 
-from .forms import CreateUserForm, EditUserForm, UserSignupForm, EditUserProfileForm
-from .models import Subscription
+from .forms import CreateUserForm, EditUserForm, UserSignupForm, EditUserProfileForm, SubscriptionForm, OTPForm
+from .models import Subscription, UserOTP
 from ..service.models import Service
 
 User = get_user_model()
@@ -254,11 +255,14 @@ def subscribe_service(request, service_id):
     # Create Razorpay Order
     razorpay_order = razorpay_client.order.create(dict(amount=int(amount), currency='INR', payment_capture='0'))
     razorpay_order_id = razorpay_order['id']
+    if request.method == 'POST':
+        address = request.POST.get('address')
 
     # Create Subscription record
     subscription = Subscription.objects.create(
         user=request.user,
         service=service,
+        address=address,
         amount=service.total_price,
         razorpay_order_id=razorpay_order_id,
         payment_status='Pending'
@@ -317,3 +321,86 @@ def razorpay_callback(request):
 
 def subscription_success(request):
     return render(request,'user/user/payment_success.html')
+
+
+
+class SubscribeView(LoginRequiredMixin, DetailView, FormView):
+    model = Service
+    template_name = 'user/user/subscribe_address.html'
+    form_class = SubscriptionForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        service = self.get_object()
+        context['net_price'] = service.service_price + service.service_tax
+        context['service_name'] = service.service_name
+        return context
+
+    def form_valid(self, form):
+        address = form.cleaned_data['address']
+        service = self.get_object()
+        user = self.request.user
+
+        # Calculate the amount (ensure this matches the total amount to be paid)
+        amount = service.service_price + service.service_tax
+
+        # Create and save the Subscription
+        subscription = Subscription.objects.create(
+            user=user,
+            service=service,
+            address=address,
+            amount=amount  # Ensure the amount is set here
+        )
+
+        # Redirect to a success page or the service detail page
+        return redirect('subscribe-service',service_id=service.id)
+
+
+# Email  otp  Authentication------------------------------------------------------
+
+
+class UserRegistrationView(View):
+    def get(self, request):
+        form = UserSignupForm()
+        return render(request, 'user/user/register.html', {'form': form})
+
+    def post(self, request):
+        form = UserSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            print(user)
+            user.is_active = False  # Deactivate account until it is confirmed
+            user.save()
+            otp = random.randint(100000, 999999)
+            print(otp)
+            UserOTP.objects.create(user=user, otp=otp)
+            send_mail(
+                subject='Your OTP for registration',
+                message=f'Your OTP is {otp}',
+                from_email='rajputking7976@gmail.com',
+                recipient_list=[user.email],
+            )
+            request.session['user_id'] = user.id
+            return redirect('otp-confirmation')
+        return render(request, 'user/user/register.html', {'form': form})
+
+class OTPConfirmationView(View):
+    def get(self, request):
+        form = OTPForm()
+        return render(request, 'user/user/otp_verification.html', {'form': form})
+
+    def post(self, request):
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            otp = form.cleaned_data['otp']
+            user_id = request.session.get('user_id')
+            user_otp = UserOTP.objects.get(user__id=user_id)
+            if user_otp.otp == otp:
+                user = user_otp.user
+                user.is_active = True
+                user.save()
+                user_otp.delete()
+                return redirect('user-home')
+        return render(request, 'user/user/otp_verification.html',{'form':form})
+
+
