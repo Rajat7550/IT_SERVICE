@@ -1,5 +1,5 @@
 import datetime
-from random import randint, random
+import random
 import pandas as pd
 import razorpay
 from django.conf import settings
@@ -160,12 +160,12 @@ class LoginView(View):
             return HttpResponseRedirect(reverse(self.login_url))
 
 
-class RegisterView(SuccessMessageMixin, CreateView):
-    model = User
-    form_class = UserSignupForm
-    template_name = 'user/user/register.html'
-    success_message = "You have registered successfully"
-    success_url = reverse_lazy('user-login')
+# class RegisterView(SuccessMessageMixin, CreateView):
+#     model = User
+#     form_class = UserSignupForm
+#     template_name = 'user/user/register.html'
+#     success_message = "You have registered successfully"
+#     success_url = reverse_lazy('user-login')
 
 
 class LogoutView(UserRequiredMixin, LoginRequiredMixin, View):
@@ -368,7 +368,7 @@ class UserRegistrationView(View):
         form = UserSignupForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            print(user)
+            print(user.email)
             user.is_active = False  # Deactivate account until it is confirmed
             user.save()
             otp = random.randint(100000, 999999)
@@ -377,7 +377,7 @@ class UserRegistrationView(View):
             send_mail(
                 subject='Your OTP for registration',
                 message=f'Your OTP is {otp}',
-                from_email='rajputking7976@gmail.com',
+                from_email='rajatsaini0506@gmail.com',
                 recipient_list=[user.email],
             )
             request.session['user_id'] = user.id
@@ -402,5 +402,3 @@ class OTPConfirmationView(View):
                 user_otp.delete()
                 return redirect('user-home')
         return render(request, 'user/user/otp_verification.html',{'form':form})
-
-

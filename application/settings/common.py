@@ -216,24 +216,31 @@ DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 
 
 # #Email Server
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'deepaktestacc@gmail.com'
-EMAIL_HOST_PASSWORD = 'deepak@123'
-EMAIL_USE_TLS = True
-APPEND_SLASH = False
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'deepaktestacc@gmail.com'
+# EMAIL_HOST_PASSWORD = 'deepak@123'
+# EMAIL_USE_TLS = True
 
+#Email Server
 
-RAZORPAY_KEY_ID = 'rzp_test_e664V0FP0zQy7N'
-RAZORPAY_SECRET_KEY = 'QdnuRxUHrPGeiJc9lDTXYPO7'
-
-## Email-Authentication
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'rajat@gmail.com'
-EMAIL_HOST_PASSWORD = 'mplqdyylyyugtrat'
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-#
+EMAIL_HOST_USER = 'rajatsaini0506@gmail.com'
+EMAIL_HOST_PASSWORD = 'mmfknejqoicepbjz'
+
+
+
+
+APPEND_SLASH = False
+
+
+
+
+RAZORPAY_KEY_ID = 'rzp_test_e664V0FP0zQy7N'
+RAZORPAY_SECRET_KEY = 'QdnuRxUHrPGeiJc9lDTXYPO7'
+
+

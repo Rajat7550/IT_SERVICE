@@ -18,6 +18,10 @@ from django.urls import path, include
 from . import views
 from .views import *
 
+
+
+
+
 urlpatterns = [
     # Admin
     path('admin/user/add', CreateUserView.as_view(), name='admin-user-add'),
@@ -30,7 +34,7 @@ urlpatterns = [
     # Frontend User
     path('', LandingView.as_view(), name="landing"),
     path('login/', LoginView.as_view(), name="user-login"),
-    path('register/', RegisterView.as_view(), name="user-register"),
+    # path('register/', RegisterView.as_view(), name="user-register"),
     path('logout/', LogoutView.as_view(), name="user-logout"),
     path('profile/', UpdateUserProfileView.as_view(), name="user-profile"),
     path('change-password/', ChangeUserSelfPasswordView.as_view(), name="user-change-password"),
@@ -46,6 +50,8 @@ urlpatterns = [
     path('payment-success/', views.subscription_success, name='payment-success'),
     path('subscription/<int:pk>/', SubscribeView.as_view(), name='subscription_page'),
 #Email
+
     path('register/', UserRegistrationView.as_view(), name='user-register'),
     path('otp-confirmation/', OTPConfirmationView.as_view(), name='otp-confirmation'),
+
 ]

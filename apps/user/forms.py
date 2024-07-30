@@ -61,7 +61,6 @@ class SubscriptionForm(forms.ModelForm):
 
 
 #email---
-
 class OTPForm(forms.ModelForm):
     class Meta:
         model=UserOTP
